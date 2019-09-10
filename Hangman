@@ -1,0 +1,110 @@
+import random
+import string
+
+WORDLIST_FILENAME = "words.txt"
+
+
+def load_words():
+    """
+    Returns a list of valid words. Words are strings of lowercase letters.
+    
+    Depending on the size of the word list, this function may
+    take a while to finish.
+    """
+    print("Loading word list from file...")
+    # inFile: file
+    inFile = open(WORDLIST_FILENAME, 'r')
+    # line: string
+    line = inFile.readline()
+    # wordlist: list of strings
+    wordlist = line.split()
+    print("  ", len(wordlist), "words loaded.")
+    return wordlist
+
+
+
+def choose_word(wordlist):
+    """
+    wordlist (list): list of words (strings)
+    
+    Returns a word from wordlist at random
+    """
+    return random.choice(wordlist)
+    
+# Load the list of words into the variable wordlist
+# so that it can be accessed from anywhere in the program
+wordlist = load_words()
+
+def is_word_guessed(secret_word, letters_guessed): 
+    a = 0
+    for i in range (0, len(letters_guessed)):
+        if (letters_guessed[i] in secret_word):
+            a = 0
+        else:            
+            a = 1
+            break       
+    if (a == 0):
+        return True
+    else:
+        return False 
+
+def get_available_letters(letters_guessed, lower_case):    
+    for i in range (0,len(letters_guessed)) :
+        lower_case = lower_case.replace(letters_guessed[i],"")     
+    return lower_case   
+
+def get_guessed_word(secret_word, letters_guessed, guessed_string):
+    if(len(guessed_string) == 0):
+        my_list = ["_"] * len(secret_word)    
+    else:
+        my_list = guessed_string.split()
+    for i in range (0, len(letters_guessed)):
+        list = letters_guessed[i]
+        for r in range (0, len(secret_word)):
+            secret = secret_word[r] 
+            if list == secret:
+                my_list[r] = secret
+    
+    finalResult = ""
+    for x in range(0, len(my_list)):
+        finalResult = finalResult + my_list[x] + " "
+    return finalResult  
+
+def hangman(secret_word):
+    N = len(secret_word)
+    print("Welcome to the game Hangman!")
+    print("I am thinking of a word that is", N, "letters long.")
+    guess_attempts = 6
+    result_2 = string.ascii_lowercase
+    result = []    
+    word_guessed = False
+    guessed_letters = []
+    
+    while(guess_attempts > 0):
+        print("-------------")
+        print("You have", guess_attempts, "guess left.")
+        print("Available letters: ", result_2)        
+        guess = input("Please guess a letter: ")    
+        result = get_guessed_word(secret_word, guess, result)
+        result_1 = is_word_guessed(secret_word, guess)                    
+        if result_1 == True:
+            print("Good guess: ", result)
+        else:
+            if(guess in guessed_letters):
+                print("Oops! You've already guessed that letter: ", result)
+            else:
+                print("Oops! That letter is not in my word: ", result)
+                guess_attempts = guess_attempts - 1                
+        result_2 = get_available_letters(guess,result_2)
+        guessed_letters.append(guess)
+        
+        completely_guessed = result.replace(" ","")
+        if(completely_guessed == secret_word):
+            word_guessed = True            
+            break
+        
+    if(word_guessed):
+        print("Congratulations, you won!")
+    else:
+        print("Sorry , you ran out of guesses. The word was", secret_word)
+    return (word_guessed, guess_attempts, result_2)
